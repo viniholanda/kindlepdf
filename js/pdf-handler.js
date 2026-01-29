@@ -21,7 +21,8 @@ const PDFHandler = (() => {
 
     // Initialize PDF.js worker
     function init() {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '/js/lib/pdf.worker.min.js';
+        // Usar CDN para garantir funcionamento local e online
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
     // Load PDF from ArrayBuffer
