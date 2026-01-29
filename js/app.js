@@ -422,7 +422,7 @@ const App = (() => {
         }
 
         elements.bookmarksList.innerHTML = bookmarks.map(bm => `
-            <div class="bookmark-item" data-id="${bm.id}" data-page="${bm.page}">
+            <div class="bookmark-item" data-id="${bm.id}" data-page="${bm.page}" data-snippet="${(bm.contentSnippet || '').replace(/"/g, '&quot;')}">
                 <span class="bookmark-icon">🔖</span>
                 <div class="bookmark-info">
                     <span class="bookmark-page">Página ${bm.page}</span>
@@ -435,7 +435,15 @@ const App = (() => {
         elements.bookmarksList.querySelectorAll('.bookmark-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('item-delete')) {
-                    PDFHandler.goToPage(parseInt(item.dataset.page), elements.pdfPages);
+                    const snippet = item.dataset.snippet;
+                    let targetPage = parseInt(item.dataset.page);
+
+                    if (snippet) {
+                        const foundPage = PDFHandler.findPageForContent(snippet);
+                        if (foundPage !== -1) targetPage = foundPage;
+                    }
+
+                    PDFHandler.goToPage(targetPage, elements.pdfPages);
                     updatePageIndicator();
                 }
             });
@@ -457,7 +465,7 @@ const App = (() => {
         }
 
         elements.notesList.innerHTML = notes.map(note => `
-            <div class="note-item" data-id="${note.id}" data-page="${note.page}">
+            <div class="note-item" data-id="${note.id}" data-page="${note.page}" data-snippet="${(note.contentSnippet || '').replace(/"/g, '&quot;')}">
                 <span class="note-icon">📝</span>
                 <div class="note-info">
                     <span class="note-page">Página ${note.page}</span>
@@ -471,7 +479,15 @@ const App = (() => {
         elements.notesList.querySelectorAll('.note-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('item-delete')) {
-                    PDFHandler.goToPage(parseInt(item.dataset.page), elements.pdfPages);
+                    const snippet = item.dataset.snippet;
+                    let targetPage = parseInt(item.dataset.page);
+
+                    if (snippet) {
+                        const foundPage = PDFHandler.findPageForContent(snippet);
+                        if (foundPage !== -1) targetPage = foundPage;
+                    }
+
+                    PDFHandler.goToPage(targetPage, elements.pdfPages);
                     updatePageIndicator();
                 }
             });
@@ -486,7 +502,8 @@ const App = (() => {
     async function addBookmark() {
         if (!currentBook) return;
         const page = PDFHandler.getCurrentPage();
-        await Storage.addBookmark(currentBook.id, page);
+        const snippet = PDFHandler.getCurrentPageContentSnippet();
+        await Storage.addBookmark(currentBook.id, page, snippet);
         await loadBookmarksAndNotes();
         elements.sidebar.classList.add('open');
         switchTab('bookmarks');
@@ -509,7 +526,8 @@ const App = (() => {
         if (!text) return;
 
         const page = PDFHandler.getCurrentPage();
-        await Storage.addNote(currentBook.id, page, text);
+        const snippet = PDFHandler.getCurrentPageContentSnippet();
+        await Storage.addNote(currentBook.id, page, text, snippet);
         closeNoteModal();
         await loadBookmarksAndNotes();
         elements.sidebar.classList.add('open');

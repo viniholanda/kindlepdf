@@ -374,6 +374,32 @@ const PDFHandler = (() => {
     function getReadingMode() { return readingMode; }
     function isLoaded() { return pdfDoc !== null; }
 
+    // Get content snippet for bookmarking
+    function getCurrentPageContentSnippet() {
+        const content = paginatedContent[currentScreenPage - 1];
+        if (!content) return '';
+        // content is array of strings (paragraphs)
+        const text = content.join(' ').replace(/\s+/g, ' ').trim();
+        return text.substring(0, 150); // Store first 150 chars
+    }
+
+    // Find page containing specific content snippet
+    function findPageForContent(snippet) {
+        if (!snippet) return -1;
+
+        // Normalize snippet
+        const search = snippet.replace(/\s+/g, ' ').trim();
+        if (search.length < 10) return -1;
+
+        for (let i = 0; i < paginatedContent.length; i++) {
+            const pageText = paginatedContent[i].join(' ').replace(/\s+/g, ' ');
+            if (pageText.includes(search)) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
     return {
         init,
         loadPDF,
@@ -389,6 +415,8 @@ const PDFHandler = (() => {
         generateCover,
         updateCurrentPageFromScroll,
         getCurrentPage,
+        getCurrentPageContentSnippet,
+        findPageForContent,
         getTotalPages,
         getScale,
         getFontSize,

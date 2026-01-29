@@ -136,15 +136,15 @@ const Storage = (() => {
     async function deleteBook(bookId) {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['books', 'bookmarks', 'notes'], 'readwrite');
-            
+
             // Delete book
             transaction.objectStore('books').delete(bookId);
-            
+
             // Delete associated bookmarks
             const bookmarksStore = transaction.objectStore('bookmarks');
             const bookmarksIndex = bookmarksStore.index('bookId');
             const bookmarksRequest = bookmarksIndex.openCursor(IDBKeyRange.only(bookId));
-            
+
             bookmarksRequest.onsuccess = (event) => {
                 const cursor = event.target.result;
                 if (cursor) {
@@ -157,7 +157,7 @@ const Storage = (() => {
             const notesStore = transaction.objectStore('notes');
             const notesIndex = notesStore.index('bookId');
             const notesRequest = notesIndex.openCursor(IDBKeyRange.only(bookId));
-            
+
             notesRequest.onsuccess = (event) => {
                 const cursor = event.target.result;
                 if (cursor) {
@@ -175,11 +175,12 @@ const Storage = (() => {
     // Bookmarks Operations
     // ==========================================
 
-    async function addBookmark(bookId, page) {
+    async function addBookmark(bookId, page, contentSnippet = '') {
         const bookmark = {
             id: generateId(),
             bookId: bookId,
             page: page,
+            contentSnippet: contentSnippet,
             createdAt: new Date().toISOString()
         };
 
@@ -223,12 +224,13 @@ const Storage = (() => {
     // Notes Operations
     // ==========================================
 
-    async function addNote(bookId, page, text) {
+    async function addNote(bookId, page, text, contentSnippet = '') {
         const note = {
             id: generateId(),
             bookId: bookId,
             page: page,
             text: text,
+            contentSnippet: contentSnippet,
             createdAt: new Date().toISOString()
         };
 
