@@ -422,7 +422,7 @@ const App = (() => {
         }
 
         elements.bookmarksList.innerHTML = bookmarks.map(bm => `
-            <div class="bookmark-item" data-id="${bm.id}" data-page="${bm.page}" data-snippet="${(bm.contentSnippet || '').replace(/"/g, '&quot;')}">
+            <div class="bookmark-item" data-id="${bm.id}" data-page="${bm.page}" data-snippet="${(bm.contentSnippet || '').replace(/"/g, '&quot;')}" data-offset="${bm.globalOffset || -1}">
                 <span class="bookmark-icon">🔖</span>
                 <div class="bookmark-info">
                     <span class="bookmark-page">Página ${bm.page}</span>
@@ -436,9 +436,13 @@ const App = (() => {
             item.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('item-delete')) {
                     const snippet = item.dataset.snippet;
+                    const offset = parseInt(item.dataset.offset || -1);
                     let targetPage = parseInt(item.dataset.page);
 
-                    if (snippet) {
+                    if (offset !== -1) {
+                        const foundPage = PDFHandler.findPageForOffset(offset);
+                        if (foundPage !== -1) targetPage = foundPage;
+                    } else if (snippet) {
                         const foundPage = PDFHandler.findPageForContent(snippet);
                         if (foundPage !== -1) targetPage = foundPage;
                     }
@@ -465,7 +469,7 @@ const App = (() => {
         }
 
         elements.notesList.innerHTML = notes.map(note => `
-            <div class="note-item" data-id="${note.id}" data-page="${note.page}" data-snippet="${(note.contentSnippet || '').replace(/"/g, '&quot;')}">
+            <div class="note-item" data-id="${note.id}" data-page="${note.page}" data-snippet="${(note.contentSnippet || '').replace(/"/g, '&quot;')}" data-offset="${note.globalOffset || -1}">
                 <span class="note-icon">📝</span>
                 <div class="note-info">
                     <span class="note-page">Página ${note.page}</span>
@@ -480,9 +484,13 @@ const App = (() => {
             item.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('item-delete')) {
                     const snippet = item.dataset.snippet;
+                    const offset = parseInt(item.dataset.offset || -1);
                     let targetPage = parseInt(item.dataset.page);
 
-                    if (snippet) {
+                    if (offset !== -1) {
+                        const foundPage = PDFHandler.findPageForOffset(offset);
+                        if (foundPage !== -1) targetPage = foundPage;
+                    } else if (snippet) {
                         const foundPage = PDFHandler.findPageForContent(snippet);
                         if (foundPage !== -1) targetPage = foundPage;
                     }
@@ -501,9 +509,15 @@ const App = (() => {
 
     async function addBookmark() {
         if (!currentBook) return;
+
+        if (!confirm('Deseja adicionar um marcador nesta página?')) {
+            return;
+        }
+
         const page = PDFHandler.getCurrentPage();
         const snippet = PDFHandler.getCurrentPageContentSnippet();
-        await Storage.addBookmark(currentBook.id, page, snippet);
+        const offset = PDFHandler.getCurrentPageOffset();
+        await Storage.addBookmark(currentBook.id, page, snippet, offset);
         await loadBookmarksAndNotes();
         elements.sidebar.classList.add('open');
         switchTab('bookmarks');
@@ -527,7 +541,8 @@ const App = (() => {
 
         const page = PDFHandler.getCurrentPage();
         const snippet = PDFHandler.getCurrentPageContentSnippet();
-        await Storage.addNote(currentBook.id, page, text, snippet);
+        const offset = PDFHandler.getCurrentPageOffset();
+        await Storage.addNote(currentBook.id, page, text, snippet, offset);
         closeNoteModal();
         await loadBookmarksAndNotes();
         elements.sidebar.classList.add('open');

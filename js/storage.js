@@ -175,12 +175,13 @@ const Storage = (() => {
     // Bookmarks Operations
     // ==========================================
 
-    async function addBookmark(bookId, page, contentSnippet = '') {
+    async function addBookmark(bookId, page, contentSnippet = '', globalOffset = -1) {
         const bookmark = {
             id: generateId(),
             bookId: bookId,
             page: page,
             contentSnippet: contentSnippet,
+            globalOffset: globalOffset,
             createdAt: new Date().toISOString()
         };
 
@@ -224,13 +225,14 @@ const Storage = (() => {
     // Notes Operations
     // ==========================================
 
-    async function addNote(bookId, page, text, contentSnippet = '') {
+    async function addNote(bookId, page, text, contentSnippet = '', globalOffset = -1) {
         const note = {
             id: generateId(),
             bookId: bookId,
             page: page,
             text: text,
             contentSnippet: contentSnippet,
+            globalOffset: globalOffset,
             createdAt: new Date().toISOString()
         };
 
