@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="KindlePDF - Leitor de PDF elegante com experiência de leitura estilo Kindle">
+    <title>KindlePDF - Leitor de PDF</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- PDF.js -->
+    <script src="js/lib/pdf.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body data-theme="light">
+    <!-- ============================================ -->
+    <!-- LIBRARY VIEW -->
+    <!-- ============================================ -->
+    <div id="library-view" class="view active">
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">
+                    <span class="logo-icon">📖</span>
+                    <span class="logo-text">KindlePDF v2.0</span>
+                </h1>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle-library" class="btn-icon" title="Alternar tema">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="library-content">
+            <div class="library-header">
+                <h2 class="section-title">Sua Biblioteca</h2>
+                <div class="library-actions">
+                    <label for="pdf-upload" class="btn-primary">
+                        <span class="btn-icon-left">+</span>
+                        Adicionar Livro
+                    </label>
+                    <input type="file" id="pdf-upload" accept=".pdf" hidden>
+                </div>
+            </div>
+
+            <div id="empty-library" class="empty-state">
+                <div class="empty-icon">📚</div>
+                <h3>Sua biblioteca está vazia</h3>
+                <p>Adicione seu primeiro PDF para começar a leitura</p>
+                <label for="pdf-upload-empty" class="btn-primary btn-large">
+                    <span class="btn-icon-left">+</span>
+                    Adicionar PDF
+                </label>
+                <input type="file" id="pdf-upload-empty" accept=".pdf" hidden>
+
+                <div class="drop-zone" id="drop-zone">
+                    <p>ou arraste e solte arquivos PDF aqui</p>
+                </div>
+            </div>
+
+            <div id="book-grid" class="book-grid"></div>
+        </main>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- READER VIEW -->
+    <!-- ============================================ -->
+    <div id="reader-view" class="view">
+        <!-- Top Toolbar -->
+        <header class="reader-header">
+            <div class="header-left">
+                <button id="back-to-library" class="btn-icon" title="Voltar à biblioteca">
+                    ←
+                </button>
+                <h2 id="book-title" class="book-title">Nome do Livro</h2>
+            </div>
+            <div class="header-center">
+                <span id="page-indicator" class="page-indicator">1 / 1</span>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle-reader" class="btn-icon" title="Alternar tema">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                <button id="toggle-sidebar" class="btn-icon" title="Marcadores e Notas">
+                    📑
+                </button>
+                <button id="fullscreen-btn" class="btn-icon" title="Tela cheia">
+                    ⛶
+                </button>
+            </div>
+        </header>
+
+        <!-- Bottom Toolbar -->
+        <div class="reader-toolbar">
+            <div class="toolbar-group">
+                <button id="reading-mode-scroll" class="btn-toolbar" title="Rolagem contínua">
+                    📜 Scroll
+                </button>
+                <button id="reading-mode-page" class="btn-toolbar active" title="Modo página">
+                    📄 Página
+                </button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <div class="toolbar-group zoom-controls">
+                <button id="zoom-out" class="btn-icon-small" title="Diminuir fonte">A−</button>
+                <input type="range" id="zoom-slider" min="12" max="32" value="18" class="zoom-slider">
+                <span id="zoom-value" class="zoom-value">18px</span>
+                <button id="zoom-in" class="btn-icon-small" title="Aumentar fonte">A+</button>
+                <button id="fit-width" class="btn-toolbar" title="Fonte padrão">↺ Reset</button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <div class="toolbar-group">
+                <button id="add-bookmark" class="btn-toolbar" title="Adicionar marcador">
+                    🔖 Marcar
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Reader Area -->
+        <main class="reader-main">
+            <!-- PDF Container -->
+            <div id="pdf-container" class="pdf-container scroll-mode">
+                <div id="pdf-pages" class="pdf-pages"></div>
+            </div>
+
+            <!-- Page Navigation (for page mode) -->
+            <button id="prev-page" class="page-nav page-nav-prev" title="Página anterior">
+                ‹
+            </button>
+            <button id="next-page" class="page-nav page-nav-next" title="Próxima página">
+                ›
+            </button>
+        </main>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>Marcadores & Notas</h3>
+                <button id="close-sidebar" class="btn-icon-small">✕</button>
+            </div>
+
+            <div class="sidebar-tabs">
+                <button class="tab-btn active" data-tab="bookmarks">Marcadores</button>
+                <button class="tab-btn" data-tab="notes">Notas</button>
+            </div>
+
+            <div class="sidebar-content">
+                <div id="bookmarks-list" class="tab-content active">
+                    <div class="empty-sidebar">
+                        <p>Nenhum marcador ainda</p>
+                        <small>Clique em "Marcar" para adicionar</small>
+                    </div>
+                </div>
+                <div id="notes-list" class="tab-content">
+                    <div class="empty-sidebar">
+                        <p>Nenhuma nota ainda</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="add-note-btn" class="btn-secondary btn-full">
+                    + Adicionar Nota
+                </button>
+            </div>
+        </aside>
+
+        <!-- Note Modal -->
+        <div id="note-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Nova Nota</h3>
+                    <button id="close-note-modal" class="btn-icon-small">✕</button>
+                </div>
+                <div class="modal-body">
+                    <label for="note-text">Sua nota para a página <span id="note-page-num">1</span>:</label>
+                    <textarea id="note-text" rows="4" placeholder="Escreva sua nota aqui..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancel-note" class="btn-secondary">Cancelar</button>
+                    <button id="save-note" class="btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="reading-progress">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Carregando PDF...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/themes.js"></script>
+    <script src="js/pdf-handler.js?v=12"></script>
+    <script src="js/app.js?v=12"></script>
+</body>
+
+</html>
