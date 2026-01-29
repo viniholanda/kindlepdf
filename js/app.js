@@ -89,7 +89,8 @@ const App = (() => {
         });
 
         // Bookmarks & Notes
-        document.getElementById('add-bookmark').addEventListener('click', addBookmark);
+        document.getElementById('add-bookmark').addEventListener('click', openBookmarkSidebar);
+        document.getElementById('btn-add-bookmark-confirm').addEventListener('click', handleAddBookmark);
         document.getElementById('add-note-btn').addEventListener('click', openNoteModal);
         document.getElementById('close-note-modal').addEventListener('click', closeNoteModal);
         document.getElementById('cancel-note').addEventListener('click', closeNoteModal);
@@ -399,6 +400,13 @@ const App = (() => {
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.toggle('active', content.id === `${tab}-list`);
         });
+        document.querySelectorAll('.tab-action').forEach(action => {
+            if (action.dataset.tab === tab) {
+                action.style.display = 'block';
+            } else {
+                action.style.display = 'none';
+            }
+        });
     }
 
     async function loadBookmarksAndNotes() {
@@ -507,20 +515,20 @@ const App = (() => {
         });
     }
 
-    async function addBookmark() {
+    async function openBookmarkSidebar() {
         if (!currentBook) return;
+        elements.sidebar.classList.add('open');
+        switchTab('bookmarks');
+    }
 
-        if (!confirm('Deseja adicionar um marcador nesta página?')) {
-            return;
-        }
+    async function handleAddBookmark() {
+        if (!currentBook) return;
 
         const page = PDFHandler.getCurrentPage();
         const snippet = PDFHandler.getCurrentPageContentSnippet();
         const offset = PDFHandler.getCurrentPageOffset();
         await Storage.addBookmark(currentBook.id, page, snippet, offset);
         await loadBookmarksAndNotes();
-        elements.sidebar.classList.add('open');
-        switchTab('bookmarks');
     }
 
     function openNoteModal() {

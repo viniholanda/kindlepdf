@@ -825,6 +825,22 @@ p {
     padding: var(--space-md);
 }
 
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.tab-action {
+    display: none;
+    /* JS will toggle this */
+}
+
+.tab-action.active {
+    display: block;
+}
+
 .tab-content {
     display: none;
 }
